@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spacelopedia | Moon Missions</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+  body { background-color: #05070a; color: #e2e8f0; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+  .font-space { font-family: 'Orbitron', sans-serif; }
+  .hero-gradient { background: radial-gradient(circle at center, #111827 0%, #05070a 100%); }
+  .glass-card { background: rgba(255,255,255,0.02); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); transition: all 0.4s ease; }
+  .glass-card:hover { border-color: rgba(59, 130, 246,0.4); transform: translateY(-5px); }
+  .page-node { display: none; }
+  .page-active { display: block; animation: fadeIn 0.8s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  ::-webkit-scrollbar { width: 6px; } 
+  ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+</style>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<nav class="fixed w-full z-50 px-6 py-4 flex justify-between items-center glass-card border-none">
+  <h1 onclick="showPage('home')" class="text-xl md:text-2xl font-space font-bold tracking-tighter text-blue-400 italic cursor-pointer">SPACELOPEDIA</h1>
+  <div class="flex space-x-6 text-xs uppercase tracking-widest font-space">
+    <button onclick="showPage('projects')" class="hover:text-blue-400 transition">Projects</button>
+    <button onclick="showPage('astronauts')" class="hover:text-blue-400 transition border-l border-white/10 pl-6">Astronauts</button>
+  </div>
+</nav>
+
+<!-- HOME PAGE -->
+<div id="home-page" class="page-node page-active">
+  <section class="h-screen flex flex-col items-center justify-center text-center px-4 hero-gradient relative">
+    <div class="absolute inset-0 opacity-10 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]"></div>
+    <div data-aos="zoom-out" data-aos-duration="1500">
+      <h2 class="text-5xl md:text-8xl font-space font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-600">
+        Moon Missions
+      </h2>
+      <p class="max-w-2xl mx-auto text-gray-400 text-lg mb-10 leading-relaxed">
+        Explore humanity's journey from Apollo to Artemis. Discover all moon missions, astronauts, and historic achievements in one place.
+      </p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <button onclick="showPage('projects')" class="px-10 py-4 border-2 border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white rounded-full font-space tracking-widest text-sm inline-block shadow-[0_0_15px_rgba(59,130,246,0.3)]">Explore Projects</button>
+        <button onclick="showPage('astronauts')" class="px-10 py-4 border-2 border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white rounded-full font-space tracking-widest text-sm inline-block shadow-[0_0_15px_rgba(128,0,128,0.3)]">Meet Astronauts</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- PROJECTS PAGE -->
+<div id="projects-page" class="page-node pt-32 pb-20">
+  <div class="container mx-auto px-6">
+    <h2 class="text-3xl mb-6 text-center font-space font-bold text-white">Moon Missions Archive</h2>
+
+    <!-- SEARCH FILTER -->
+    <div class="flex flex-wrap justify-center gap-4 mb-8">
+      <input id="search-name" type="text" placeholder="Search by Name" class="px-4 py-2 rounded bg-gray-800 text-white border border-gray-600 focus:outline-none focus:border-blue-500">
+      <input id="search-country" type="text" placeholder="Search by Country" class="px-4 py-2 rounded bg-gray-800 text-white border border-gray-600 focus:outline-none focus:border-blue-500">
+      <input id="search-year" type="number" placeholder="Search by Year" class="px-4 py-2 rounded bg-gray-800 text-white border border-gray-600 focus:outline-none focus:border-blue-500">
+      <button onclick="filterProjects()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Search</button>
+      <button onclick="resetFilter()" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">Reset</button>
+    </div>
+
+    <!-- PROJECTS GRID -->
+    <div id="projects-grid" class="grid md:grid-cols-2 gap-8"></div>
+
+    <div class="text-center mt-10">
+      <button onclick="showPage('home-page')" class="text-gray-400 hover:text-white">← Back to Home</button>
+    </div>
+  </div>
+</div>
+
+<!-- ASTRONAUTS PAGE -->
+<div id="astronauts-page" class="page-node pt-32 pb-20">
+  <div class="container mx-auto px-6 text-center">
+    <h2 class="text-3xl font-space font-bold mb-12 text-white">Moon Astronauts</h2>
+    <div class="grid md:grid-cols-3 gap-8" id="astronauts-grid"></div>
+    <div class="mt-16">
+      <button onclick="showPage('home-page')" class="px-10 py-3 border-2 border-white/20 text-white/70 hover:border-purple-500 hover:text-purple-400 rounded-lg font-space tracking-widest text-xs">← Back to Home</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+AOS.init({ duration: 1000, once: true });
+
+// MOON PROJECTS (20)
+const moonProjects = [
+  { name:"Luna 2", year:1959, country:"USSR", status:"Impact", story:"The first human-made object to reach the Moon's surface, marking a major milestone in space exploration. Its mission demonstrated the possibility of interplanetary travel and inspired future lunar missions. The spacecraft sent back important data about the Moon's surface and radiation environment." },
+  { name:"Ranger 4", year:1962, country:"USA", status:"Impact", story:"The first American spacecraft to reach the far side of the Moon. Despite losing contact, it provided lessons for future Ranger missions. This mission laid the groundwork for soft landings and Apollo guidance systems." },
+  { name:"Ranger 7", year:1964, country:"USA", status:"Impact", story:"Sent the first close-up images of the Moon's surface, enabling scientists to select Apollo landing sites. Its success demonstrated the reliability of American lunar spacecraft. Paved the way for more detailed orbital and surface missions." },
+  { name:"Luna 9", year:1966, country:"USSR", status:"Soft Landing", story:"First spacecraft to make a soft landing on the Moon. Sent panoramic images showing a safe landing surface, proving the Moon could be landed on gently. This achievement advanced robotics and automated landing techniques." },
+  { name:"Luna 10", year:1966, country:"USSR", status:"Orbit", story:"The first artificial satellite of the Moon, orbiting and sending back data about lunar gravity and radiation. Marked the beginning of long-term lunar orbital observations. Helped plan future crewed missions." },
+  { name:"Surveyor 1", year:1966, country:"USA", status:"Soft Landing", story:"First successful American soft landing on the Moon. Collected over 11,000 photographs and data to evaluate lunar soil for Apollo missions. Demonstrated safe landing technology for humans." },
+  { name:"Lunar Orbiter 1", year:1966, country:"USA", status:"Orbit", story:"Mapped lunar surface from orbit, sending high-resolution photos of landing sites for Apollo. Confirmed the Moon's terrain and hazards. Enabled Apollo astronauts to train for actual lunar conditions." },
+  { name:"Surveyor 3", year:1967, country:"USA", status:"Soft Landing", story:"Landmark soft landing visited later by Apollo 12 astronauts. Returned parts to Earth for study. Advanced understanding of lunar material and technology testing." },
+  { name:"Apollo 11 (Eagle)", year:1969, country:"USA", status:"Crewed Landing", story:"First human Moon landing. Neil Armstrong and Buzz Aldrin walked on the surface, Michael Collins orbited. This historic event fulfilled humanity's dream, inspiring generations and proving space travel beyond Earth is achievable." },
+  { name:"Luna 16", year:1970, country:"USSR", status:"Sample Return", story:"Returned lunar soil to Earth automatically. Demonstrated robotic sample collection. Provided essential lunar material for scientific analysis." },
+  { name:"Luna 17 (Lunokhod 1)", year:1970, country:"USSR", status:"Rover", story:"First remote-controlled lunar rover. Explored terrain and tested mobility on Moon's surface. Paved the way for modern robotic rovers." },
+  { name:"Apollo 15 (LRV-1)", year:1971, country:"USA", status:"Crewed Rover", story:"Introduced lunar rover for astronauts, greatly expanding surface exploration range. Conducted geological studies and experiments. Advanced mobility and lunar exploration methods." },
+  { name:"Apollo 17 (Challenger)", year:1972, country:"USA", status:"Crewed Landing", story:"Last human Moon mission so far. Carried the longest lunar stay, included geologist Harrison Schmitt. Brought back significant lunar samples and data." },
+  { name:"Hiten", year:1990, country:"Japan", status:"Orbit/Impact", story:"Japan's first lunar probe, testing orbital mechanics and trajectory adjustments. Demonstrated advanced guidance and orbital insertion for future missions." },
+  { name:"Chang'e 3 (Yutu)", year:2013, country:"China", status:"Rover", story:"First soft landing by China, with Yutu rover. Extended modern lunar exploration capabilities. Provided data on lunar geology and surface conditions." },
+  { name:"Chang'e 4 (Yutu-2)", year:2019, country:"China", status:"Rover", story:"First mission to Moon's far side. Rover conducted geological surveys. Demonstrated remote operations and international collaboration for lunar science." },
+  { name:"Artemis I", year:2022, country:"USA", status:"Uncrewed Test", story:"First flight of NASA's new SLS rocket with Orion spacecraft. Tested systems for future crewed lunar missions. Provided data on deep-space navigation and spacecraft performance." },
+  { name:"Artemis II", year:2024, country:"USA", status:"Planned Crewed Mission", story:"First planned crewed mission around the Moon. Will test life support, navigation, and Orion performance with astronauts onboard. Marks the return of humans beyond low Earth orbit." },
+  { name:"Lunar Flashlight", year:2022, country:"USA", status:"Orbiter", story:"Small satellite mission to detect water ice in permanently shadowed regions. Uses lasers to reflect signals and map potential resources for future missions." },
+  { name:"VIPER", year:2024, country:"USA", status:"Rover", story:"NASA rover designed to explore lunar South Pole, searching for water ice. Will help plan sustainable lunar bases. Includes advanced sensors and mobility systems." }
+];
+
+// ASTRONAUTS (12)
+const astronauts = [
+  { name:"Neil Armstrong", desc:"First human to walk on the Moon during Apollo 11. Served as mission commander, inspiring generations. His calm, precise execution set the standard for astronauts." },
+  { name:"Buzz Aldrin", desc:"Second human to walk on the Moon. Demonstrated EVA techniques and surface exploration. Advocated spaceflight and STEM education." },
+  { name:"Michael Collins", desc:"Command module pilot on Apollo 11, orbited the Moon alone. Crucial for mission success. Known as the unsung hero of the first Moon landing." },
+  { name:"Pete Conrad", desc:"Apollo 12 commander. Known for humor and precision. Performed lunar surface experiments and sample collection." },
+  { name:"Alan Bean", desc:"Apollo 12 lunar module pilot. Explored lunar terrain and documented geology. Later became an artist portraying space missions." },
+  { name:"Alan Shepard", desc:"First American in space; later walked on Moon during Apollo 14. Conducted lunar experiments and golf demonstration." },
+  { name:"Edgar Mitchell", desc:"Apollo 14 lunar module pilot. Studied lunar surface and conducted scientific experiments. Advocated for space consciousness research." },
+  { name:"David Scott", desc:"Apollo 15 commander. Used lunar rover extensively. Conducted geology experiments and documented findings." },
+  { name:"James Irwin", desc:"Apollo 15 lunar module pilot. Collected lunar samples and explored Moon's surface with rover. Focused on scientific data collection." },
+  { name:"John Young", desc:"Apollo 16 commander. Conducted EVA and geological experiments. Experienced astronaut with Gemini and Shuttle flights." },
+  { name:"Charles Duke", desc:"Apollo 16 lunar module pilot. Performed sample collection and detailed surface surveys. Later became a public speaker on spaceflight." },
+  { name:"Harrison Schmitt", desc:"Apollo 17 geologist and lunar module pilot. First professional scientist to walk on Moon. Collected critical lunar samples." }
+];
+
+// RENDER PROJECTS
+function renderProjects(projects) {
+  const grid = document.getElementById('projects-grid');
+  grid.innerHTML = '';
+  projects.forEach((p, i) => {
+    const card = document.createElement('div');
+    card.className = 'glass-card p-6 rounded-2xl border-l-2 border-blue-500/30';
+    card.setAttribute('data-aos','fade-up');
+    card.setAttribute('data-aos-delay',i*50);
+    card.innerHTML = `
+      <h3 class="text-xl font-bold mb-2 text-blue-400">${p.name} (${p.year})</h3>
+      <p class="mb-1"><strong>Country:</strong> ${p.country}</p>
+      <p class="mb-1"><strong>Status:</strong> ${p.status}</p>
+      <p class="text-gray-300 mt-2">${p.story}</p>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// FILTER PROJECTS
+function filterProjects() {
+  const nameFilter = document.getElementById('search-name').value.toLowerCase();
+  const countryFilter = document.getElementById('search-country').value.toLowerCase();
+  const yearFilter = document.getElementById('search-year').value;
+
+  const filtered = moonProjects.filter(p => {
+    const matchName = p.name.toLowerCase().includes(nameFilter);
+    const matchCountry = p.country.toLowerCase().includes(countryFilter);
+    const matchYear = yearFilter ? p.year == yearFilter : true;
+    return matchName && matchCountry && matchYear;
+  });
+
+  renderProjects(filtered);
+}
+
+// RESET FILTER
+function resetFilter() {
+  document.getElementById('search-name').value = '';
+  document.getElementById('search-country').value = '';
+  document.getElementById('search-year').value = '';
+  renderProjects(moonProjects);
+}
+
+// RENDER ASTRONAUTS
+function renderAstronauts() {
+  const grid = document.getElementById('astronauts-grid');
+  grid.innerHTML = '';
+  astronauts.forEach((a, i) => {
+    const card = document.createElement('div');
+    card.className = 'glass-card p-6 rounded-3xl';
+    card.setAttribute('data-aos','flip-left');
+    card.setAttribute('data-aos-delay',i*100);
+    card.innerHTML = `
+      <div class="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-blue-500 p-1">
+        <img src="https://www.nasa.gov/sites/default/files/thumbnails/image/as11-40-5886orig.jpg" class="object-cover w-full h-full rounded-full grayscale hover:grayscale-0 transition duration-500">
+      </div>
+      <h5 class="text-xl font-bold mb-2">${a.name}</h5>
+      <p class="text-gray-400 text-sm italic">${a.desc}</p>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// PAGE NAVIGATION
+function showPage(pageId) {
+  document.querySelectorAll('.page-node').forEach(p => p.classList.remove('page-active'));
+  const target = document.getElementById(pageId + '-page') || document.getElementById(pageId);
+  if(target) {
+    target.classList.add('page-active');
+    window.scrollTo({ top:0, behavior:'smooth' });
+    if(pageId==='projects') renderProjects(moonProjects);
+    if(pageId==='astronauts') renderAstronauts();
+    AOS.refresh();
+  }
+}
+
+// INITIAL LOAD
+renderProjects(moonProjects);
+renderAstronauts();
+</script>
+
+</body>
+</html>
