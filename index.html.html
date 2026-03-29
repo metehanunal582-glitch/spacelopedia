@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spacelopedia | Moon Missions</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+  body { background-color: #05070a; color: #e2e8f0; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+  .font-space { font-family: 'Orbitron', sans-serif; }
+  .hero-gradient { background: radial-gradient(circle at center, #111827 0%, #05070a 100%); }
+  .glass-card { background: rgba(255,255,255,0.02); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); transition: all 0.4s ease; }
+  .glass-card:hover { border-color: rgba(59, 130, 246,0.4); transform: translateY(-5px); }
+  .page-node { display: none; }
+  .page-active { display: block; animation: fadeIn 0.8s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  ::-webkit-scrollbar { width: 6px; } 
+  ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+</style>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<nav class="fixed w-full z-50 px-6 py-4 flex justify-between items-center glass-card border-none">
+  <h1 onclick="showPage('home')" class="text-xl md:text-2xl font-space font-bold tracking-tighter text-blue-400 italic cursor-pointer">SPACELOPEDIA</h1>
+  <div class="flex space-x-6 text-xs uppercase tracking-widest font-space">
+    <button onclick="showPage('projects')" class="hover:text-blue-400 transition">Projects</button>
+    <button onclick="showPage('astronauts')" class="hover:text-blue-400 transition border-l border-white/10 pl-6">Astronauts</button>
+  </div>
+</nav>
+
+<!-- HOME PAGE -->
+<div id="home-page" class="page-node page-active">
+  <section class="h-screen flex flex-col items-center justify-center text-center px-4 hero-gradient relative">
+    <div class="absolute inset-0 opacity-10 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]"></div>
+    <div data-aos="zoom-out" data-aos-duration="1500">
+      <h2 class="text-5xl md:text-8xl font-space font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-600">
+        Moon Missions
+      </h2>
+      <p class="max-w-2xl mx-auto text-gray-400 text-lg mb-10 leading-relaxed">
+        Explore humanity's journey from Apollo to Artemis. Discover all moon missions, astronauts, and historic achievements in one place.
+      </p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <button onclick="showPage('projects')" class="px-10 py-4 border-2 border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white rounded-full font-space tracking-widest text-sm inline-block shadow-[0_0_15px_rgba(59,130,246,0.3)]">Explore Projects</button>
+        <button onclick="showPage('astronauts')" class="px-10 py-4 border-2 border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white rounded-full font-space tracking-widest text-sm inline-block shadow-[0_0_15px_rgba(128,0,128,0.3)]">Meet Astronauts</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- PROJECTS PAGE -->
+<div id="projects-page" class="page-node pt-32 pb-20">
+  <div class="container mx-auto px-6">
+    <h2 class="text-3xl mb-6 text-center font-space font-bold text-white">Moon Missions Archive</h2>
+
+    <!-- SEARCH FILTER -->
+    <div class="flex flex-wrap justify-center gap-4 mb-8">
+      <input id="search-name" type="text" placeholder="Search by Name" class="px-4 py-2 rounded bg-gray-800 text-white border border-gray-600 focus:outline-none focus:border-blue-500">
+      <input id="search-country" type="text" placeholder="Search by Country" class="px-4 py-2 rounded bg-gray-800 text-white border border-gray-600 focus:outline-none focus:border-blue-500">
+      <input id="search-year" type="number" placeholder="Search by Year" class="px-4 py-2 rounded bg-gray-800 text-white border border-gray-600 focus:outline-none focus:border-blue-500">
+      <button onclick="filterProjects()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Search</button>
+      <button onclick="resetFilter()" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">Reset</button>
+    </div>
+
+    <!-- PROJECTS GRID -->
+    <div id="projects-grid" class="grid md:grid-cols-2 gap-8"></div>
+
+    <div class="text-center mt-10">
+      <button onclick="showPage('home-page')" class="text-gray-400 hover:text-white">← Back to Home</button>
+    </div>
+  </div>
+</div>
+
+<!-- ASTRONAUTS PAGE -->
+<div id="astronauts-page" class="page-node pt-32 pb-20">
+  <div class="container mx-auto px-6 text-center">
+    <h2 class="text-3xl font-space font-bold mb-12 text-white">Moon Astronauts</h2>
+    <div class="grid md:grid-cols-3 gap-8" id="astronauts-grid"></div>
+    <div class="mt-16">
+      <button onclick="showPage('home-page')" class="px-10 py-3 border-2 border-white/20 text-white/70 hover:border-purple-500 hover:text-purple-400 rounded-lg font-space tracking-widest text-xs">← Back to Home</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+AOS.init({ duration: 1000, once: true });
+
+// MOON PROJECTS (20)
+const moonProjects = [
+  { name:"Luna 2", year:1959, country:"USSR", status:"Impact", story:"The first human-made object to reach the Moon's surface, marking a major milestone in space exploration. Its mission demonstrated the possibility of interplanetary travel and inspired future lunar missions. The spacecraft sent back important data about the Moon's surface and radiation environment." },
+  { name:"Ranger 4", year:1962, country:"USA", status:"Impact", story:"The first American spacecraft to reach the far side of the Moon. Despite losing contact, it provided lessons for future Ranger missions. This mission laid the groundwork for soft landings and Apollo guidance systems." },
+  { name:"Ranger 7", year:1964, country:"USA", status:"Impact", story:"Sent the first close-up images of the Moon's surface, enabling scientists to select Apollo landing sites. Its success demonstrated the reliability of American lunar spacecraft. Paved the way for more detailed orbital and surface missions." },
+  { name:"Luna 9", year:1966, country:"USSR", status:"Soft Landing", story:"First spacecraft to make a soft landing on the Moon. Sent panoramic images showing a safe landing surface, proving the Moon could be landed on gently. This achievement advanced robotics and automated landing techniques." },
+  { name:"Luna 10", year:1966, country:"USSR", status:"Orbit", story:"The first artificial satellite of the Moon, orbiting and sending back data about lunar gravity and radiation. Marked the beginning of long-term lunar orbital observations. Helped plan future crewed missions." },
+  { name:"Surveyor 1", year:1966, country:"USA", status:"Soft Landing", story:"First successful American soft landing on the Moon. Collected over 11,000 photographs and data to evaluate lunar soil for Apollo missions. Demonstrated safe landing technology for humans." },
+  { name:"Lunar Orbiter 1", year:1966, country:"USA", status:"Orbit", story:"Mapped lunar surface from orbit, sending high-resolution photos of landing sites for Apollo. Confirmed the Moon's terrain and hazards. Enabled Apollo astronauts to train for actual lunar conditions." },
+  { name:"Surveyor 3", year:1967, country:"USA", status:"Soft Landing", story:"Landmark soft landing visited later by Apollo 12 astronauts. Returned parts to Earth for study. Advanced understanding of lunar material and technology testing." },
+  { name:"Apollo 11 (Eagle)", year:1969, country:"USA", status:"Crewed Landing", story:"First human Moon landing. Neil Armstrong and Buzz Aldrin walked on the surface, Michael Collins orbited. This historic event fulfilled humanity's dream, inspiring generations and proving space travel beyond Earth is achievable." },
+  { name:"Luna 16", year:1970, country:"USSR", status:"Sample Return", story:"Returned lunar soil to Earth automatically. Demonstrated robotic sample collection. Provided essential lunar material for scientific analysis." },
+  { name:"Luna 17 (Lunokhod 1)", year:1970, country:"USSR", status:"Rover", story:"First remote-controlled lunar rover. Explored terrain and tested mobility on Moon's surface. Paved the way for modern robotic rovers." },
+  { name:"Apollo 15 (LRV-1)", year:1971, country:"USA", status:"Crewed Rover", story:"Introduced lunar rover for astronauts, greatly expanding surface exploration range. Conducted geological studies and experiments. Advanced mobility and lunar exploration methods." },
+  { name:"Apollo 17 (Challenger)", year:1972, country:"USA", status:"Crewed Landing", story:"Last human Moon mission so far. Carried the longest lunar stay, included geologist Harrison Schmitt. Brought back significant lunar samples and data." },
+  { name:"Hiten", year:1990, country:"Japan", status:"Orbit/Impact", story:"Japan's first lunar probe, testing orbital mechanics and trajectory adjustments. Demonstrated advanced guidance and orbital insertion for future missions." },
+  { name:"Chang'e 3 (Yutu)", year:2013, country:"China", status:"Rover", story:"First soft landing by China, with Yutu rover. Extended modern lunar exploration capabilities. Provided data on lunar geology and surface conditions." },
+  { name:"Chang'e 4 (Yutu-2)", year:2019, country:"China", status:"Rover", story:"First mission to Moon's far side. Rover conducted geological surveys. Demonstrated remote operations and international collaboration for lunar science." },
+  { name:"Artemis I", year:2022, country:"USA", status:"Uncrewed Test", story:"First flight of NASA's new SLS rocket with Orion spacecraft. Tested systems for future crewed lunar missions. Provided data on deep-space navigation and spacecraft performance." },
+  { name:"Artemis II", year:2024, country:"USA", status:"Planned Crewed Mission", story:"First planned crewed mission around the Moon. Will test life support, navigation, and Orion performance with astronauts onboard. Marks the return of humans beyond low Earth orbit." },
+  { name:"Lunar Flashlight", year:2022, country:"USA", status:"Orbiter", story:"Small satellite mission to detect water ice in permanently shadowed regions. Uses lasers to reflect signals and map potential resources for future missions." },
+  { name:"VIPER", year:2024, country:"USA", status:"Rover", story:"NASA rover designed to explore lunar South Pole, searching for water ice. Will help plan sustainable lunar bases. Includes advanced sensors and mobility systems." }
+];
+
+// ASTRONAUTS (12)
+const astronauts = [
+  { name:"Neil Armstrong", desc:"First human to walk on the Moon during Apollo 11. Served as mission commander, inspiring generations. His calm, precise execution set the standard for astronauts." },
+  { name:"Buzz Aldrin", desc:"Second human to walk on the Moon. Demonstrated EVA techniques and surface exploration. Advocated spaceflight and STEM education." },
+  { name:"Michael Collins", desc:"Command module pilot on Apollo 11, orbited the Moon alone. Crucial for mission success. Known as the unsung hero of the first Moon landing." },
+  { name:"Pete Conrad", desc:"Apollo 12 commander. Known for humor and precision. Performed lunar surface experiments and sample collection." },
+  { name:"Alan Bean", desc:"Apollo 12 lunar module pilot. Explored lunar terrain and documented geology. Later became an artist portraying space missions." },
+  { name:"Alan Shepard", desc:"First American in space; later walked on Moon during Apollo 14. Conducted lunar experiments and golf demonstration." },
+  { name:"Edgar Mitchell", desc:"Apollo 14 lunar module pilot. Studied lunar surface and conducted scientific experiments. Advocated for space consciousness research." },
+  { name:"David Scott", desc:"Apollo 15 commander. Used lunar rover extensively. Conducted geology experiments and documented findings." },
+  { name:"James Irwin", desc:"Apollo 15 lunar module pilot. Collected lunar samples and explored Moon's surface with rover. Focused on scientific data collection." },
+  { name:"John Young", desc:"Apollo 16 commander. Conducted EVA and geological experiments. Experienced astronaut with Gemini and Shuttle flights." },
+  { name:"Charles Duke", desc:"Apollo 16 lunar module pilot. Performed sample collection and detailed surface surveys. Later became a public speaker on spaceflight." },
+  { name:"Harrison Schmitt", desc:"Apollo 17 geologist and lunar module pilot. First professional scientist to walk on Moon. Collected critical lunar samples." }
+];
+
+// RENDER PROJECTS
+function renderProjects(projects) {
+  const grid = document.getElementById('projects-grid');
+  grid.innerHTML = '';
+  projects.forEach((p, i) => {
+    const card = document.createElement('div');
+    card.className = 'glass-card p-6 rounded-2xl border-l-2 border-blue-500/30';
+    card.setAttribute('data-aos','fade-up');
+    card.setAttribute('data-aos-delay',i*50);
+    card.innerHTML = `
+      <h3 class="text-xl font-bold mb-2 text-blue-400">${p.name} (${p.year})</h3>
+      <p class="mb-1"><strong>Country:</strong> ${p.country}</p>
+      <p class="mb-1"><strong>Status:</strong> ${p.status}</p>
+      <p class="text-gray-300 mt-2">${p.story}</p>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// FILTER PROJECTS
+function filterProjects() {
+  const nameFilter = document.getElementById('search-name').value.toLowerCase();
+  const countryFilter = document.getElementById('search-country').value.toLowerCase();
+  const yearFilter = document.getElementById('search-year').value;
+
+  const filtered = moonProjects.filter(p => {
+    const matchName = p.name.toLowerCase().includes(nameFilter);
+    const matchCountry = p.country.toLowerCase().includes(countryFilter);
+    const matchYear = yearFilter ? p.year == yearFilter : true;
+    return matchName && matchCountry && matchYear;
+  });
+
+  renderProjects(filtered);
+}
+
+// RESET FILTER
+function resetFilter() {
+  document.getElementById('search-name').value = '';
+  document.getElementById('search-country').value = '';
+  document.getElementById('search-year').value = '';
+  renderProjects(moonProjects);
+}
+
+// RENDER ASTRONAUTS
+function renderAstronauts() {
+  const grid = document.getElementById('astronauts-grid');
+  grid.innerHTML = '';
+  astronauts.forEach((a, i) => {
+    const card = document.createElement('div');
+    card.className = 'glass-card p-6 rounded-3xl';
+    card.setAttribute('data-aos','flip-left');
+    card.setAttribute('data-aos-delay',i*100);
+    const imgSrc = a.name === "Neil Armstrong" 
+      ? "data:image/jpeg;base64,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"
+      : "https://www.nasa.gov/sites/default/files/thumbnails/image/as11-40-5886orig.jpg";
+    card.innerHTML = `
+      <div class="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-blue-500 p-1">
+        <img src="${imgSrc}" class="object-cover w-full h-full rounded-full grayscale hover:grayscale-0 transition duration-500">
+      </div>
+      <h5 class="text-xl font-bold mb-2">${a.name}</h5>
+      <p class="text-gray-400 text-sm italic">${a.desc}</p>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// PAGE NAVIGATION
+function showPage(pageId) {
+  document.querySelectorAll('.page-node').forEach(p => p.classList.remove('page-active'));
+  const target = document.getElementById(pageId + '-page') || document.getElementById(pageId);
+  if(target) {
+    target.classList.add('page-active');
+    window.scrollTo({ top:0, behavior:'smooth' });
+    if(pageId==='projects') renderProjects(moonProjects);
+    if(pageId==='astronauts') renderAstronauts();
+    AOS.refresh();
+  }
+}
+
+// INITIAL LOAD
+renderProjects(moonProjects);
+renderAstronauts();
+</script>
+
+</body>
+</html>
